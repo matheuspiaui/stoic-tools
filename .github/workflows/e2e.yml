@@ -78,31 +78,3 @@ jobs:
           name: playwright-report-${{ matrix.device }}
           path: playwright-report/
           retention-days: 7
-
-  visual-regression:
-    runs-on: ubuntu-latest
-    name: Visual Regression
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Run visual regression tests
-        run: npx playwright test --config __tests__/playwright.config.ts base/visual-regression
-
-      - name: Upload snapshot diffs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snapshot-diffs
-          path: test-results/
-          retention-days: 7

@@ -13,9 +13,13 @@ Canivete suíço de ferramentas utilitárias web. Cada ferramenta vive em uma ú
 ## Comandos
 
 ```bash
-npm run dev        # Servidor de desenvolvimento
-npm run build      # Build de produção (output em dist/)
-npm run preview    # Preview do build de produção
+npm run dev              # Servidor de desenvolvimento
+npm run build            # Build de produção (output em dist/)
+npm run preview          # Preview do build de produção
+npm run test:e2e         # Testes E2E (todos os browsers)
+npm run test:e2e:ui      # Testes E2E com interface visual
+npm run test:visual      # Visual regression (comparação de screenshots)
+npm run test:visual:update  # Atualizar screenshots de referência
 ```
 
 ## Estrutura
@@ -55,6 +59,54 @@ src/
 ## Adicionando uma Ferramenta
 
 Consulte `docs/ai/add-tool-playbook.md` para o passo a passo completo.
+
+## Testes
+
+O projeto usa **Playwright** para testes E2E cobrindo 6 pilares, testados em 5 targets (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari).
+
+### Testes automáticos (CI)
+
+Rodam em todo push/PR via GitHub Actions (`--ignore-snapshots`):
+
+| Pilar | O que valida |
+|-------|-------------|
+| Acessibilidade | axe-core WCAG 2.1 AA (contraste, labels, roles) |
+| SEO | meta tags, sitemap, robots.txt, canonical, Open Graph, headings |
+| Mobile | viewport sem overflow, conteúdo visível, sidebar responsiva |
+| Cross-browser | sem erros JS, status 200, imagens carregadas |
+| PWA | manifest.json, icons, theme-color, meta tags |
+| Negócio | lógica específica de cada tool |
+
+Toda tool adicionada ao registry (`src/lib/tools.ts`) e ao fixtures (`__tests__/utils/fixtures.ts`) é automaticamente coberta pelos 5 primeiros pilares.
+
+### Visual regression (local)
+
+Screenshots comparativos rodam **apenas localmente** para evitar lentidão no CI.
+
+```bash
+# Rodar comparação contra screenshots de referência
+npm run test:visual
+
+# Atualizar screenshots após mudança visual intencional
+npm run test:visual:update
+```
+
+**Fluxo ao alterar o visual de um componente:**
+
+1. Fazer a mudança no código
+2. Rodar `npm run test:visual` — vai **falhar** (screenshots divergem)
+3. Verificar os diffs em `test-results/` (contém `expected.png`, `actual.png`, `diff.png`)
+4. Se o resultado está correto: `npm run test:visual:update` para aceitar o novo baseline
+5. Commitar os novos snapshots junto com a mudança de código
+
+Os snapshots ficam em `__tests__/snapshots/{browser}/` e devem ser commitados no repo. Cada browser tem seus próprios baselines.
+
+### Adicionando testes para uma nova tool
+
+1. Copiar `__tests__/templates/tool-test.template.ts` para `__tests__/tools/<slug>.spec.ts`
+2. Adicionar a tool em `__tests__/utils/fixtures.ts`
+3. Preencher os testes de negócio no arquivo copiado
+4. Os testes base (a11y, SEO, mobile, cross-browser, PWA, visual) cobrem a nova tool automaticamente
 
 ## Temas
 

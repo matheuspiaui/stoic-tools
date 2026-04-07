@@ -9,7 +9,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "test:e2e": "playwright test --config __tests__/playwright.config.ts",
-    "test:e2e:ui": "playwright test --config __tests__/playwright.config.ts --ui"
+    "test:e2e:ui": "playwright test --config __tests__/playwright.config.ts --ui",
+    "test:visual": "playwright test --config __tests__/playwright.config.ts base/visual-regression",
+    "test:visual:update": "playwright test --config __tests__/playwright.config.ts base/visual-regression --update-snapshots"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.3",
