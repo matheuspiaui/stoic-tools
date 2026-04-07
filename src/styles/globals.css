@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Base surface tokens — overridden by theme presets via CSS custom properties */
+  --color-surface: var(--theme-surface, #0b1014);
+  --color-panel: var(--theme-panel, #121a21);
+  --color-accent: var(--theme-accent, #7dd3fc);
+  --color-muted: var(--theme-muted, #8da1ad);
+  --color-foreground: var(--theme-foreground, #e2e8f0);
+  --color-success: var(--theme-success, #29d391);
+  --color-danger: var(--theme-danger, #ff6b6b);
+  --color-warning: var(--theme-warning, #f6c453);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-foreground font-sans antialiased;
+  }
+}
