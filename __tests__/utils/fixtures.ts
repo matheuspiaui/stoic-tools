@@ -30,6 +30,12 @@ export const toolFixtures: ToolFixture[] = [
     description: "Transforme texto entre diferentes formatos de capitalização.",
     path: "/tools/text-case-converter",
   },
+  {
+    slug: "count-days",
+    name: "Contador de Dias",
+    description: "Calcule a quantidade de dias entre duas datas.",
+    path: "/tools/count-days",
+  },
 ];
 
 /** All pages that should be tested (home + tools) */
