@@ -14,6 +14,15 @@ export default defineConfig({
     ? [["html", { open: "never" }], ["github"]]
     : [["html", { open: "on-failure" }]],
   timeout: 60_000,
+  snapshotPathTemplate:
+    "{testDir}/snapshots/{projectName}/{testFilePath}/{arg}{ext}",
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.01,
+      threshold: 0.2,
+      animations: "disabled",
+    },
+  },
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",

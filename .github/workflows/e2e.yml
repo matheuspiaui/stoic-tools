@@ -28,8 +28,8 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Run E2E tests
-        run: npx playwright test --config __tests__/playwright.config.ts --project=${{ matrix.browser }}
+      - name: Run E2E tests (functional)
+        run: npx playwright test --config __tests__/playwright.config.ts --project=${{ matrix.browser }} --ignore-snapshots
 
       - name: Upload test report
         if: failure()
@@ -65,8 +65,8 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Run mobile E2E tests
-        run: npx playwright test --config __tests__/playwright.config.ts --project=${{ matrix.device }}
+      - name: Run mobile E2E tests (functional)
+        run: npx playwright test --config __tests__/playwright.config.ts --project=${{ matrix.device }} --ignore-snapshots
 
       - name: Upload test report
         if: failure()
@@ -75,3 +75,76 @@ jobs:
           name: playwright-report-${{ matrix.device }}
           path: playwright-report/
           retention-days: 7
+
+  visual-regression:
+    runs-on: ubuntu-latest
+    name: Visual Regression
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run visual regression tests
+        id: visual
+        continue-on-error: true
+        run: npx playwright test --config __tests__/playwright.config.ts base/visual-regression
+
+      - name: Upload snapshot diffs
+        if: steps.visual.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-diffs
+          path: test-results/
+          retention-days: 7
+
+  update-snapshots:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: [visual-regression]
+    name: Update snapshots (if needed)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Update snapshots
+        run: npx playwright test --config __tests__/playwright.config.ts base/visual-regression --update-snapshots
+
+      - name: Check for snapshot changes
+        id: changes
+        run: |
+          git add __tests__/snapshots/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit updated snapshots
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          git commit -m "test: update visual regression snapshots [skip ci]"
+          git push

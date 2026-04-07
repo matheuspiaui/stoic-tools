@@ -15,6 +15,7 @@
  *   - Mobile (responsive, no overflow)
  *   - Cross-browser (chromium, firefox, webkit)
  *   - PWA (manifest, theme-color, icons)
+ *   - Visual regression (screenshot comparisons)
  *
  * Este arquivo é para testes de NEGÓCIO específicos da sua tool.
  * =============================================================================
