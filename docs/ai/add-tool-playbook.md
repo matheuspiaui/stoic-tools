@@ -57,14 +57,29 @@ Adicione uma entrada ao array `tools`:
 },
 ```
 
-### 4. Verificar
+### 4. Atualizar fixtures de teste
+
+Arquivo: `__tests__/utils/fixtures.ts`
+
+Adicione uma entrada ao array `toolFixtures` para que todos os testes base (SEO, acessibilidade, mobile, cross-browser, PWA, visual regression) cubram a nova ferramenta automaticamente:
+
+```ts
+{
+  slug: "<slug>",
+  name: "Nome da Ferramenta",
+  description: "Descrição curta.",
+  path: "/tools/<slug>",
+},
+```
+
+### 5. Verificar
 
 ```bash
 npm run build   # deve compilar sem erros
 npm run dev     # verificar visualmente
 ```
 
-### 5. Confirmar
+### 6. Confirmar
 
 - [ ] Ferramenta aparece no sidebar
 - [ ] Ferramenta aparece no catálogo (home)
