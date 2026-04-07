@@ -1,0 +1,8 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import { UnitConverterTool } from "../../components/tools/unit-converter";
+---
+
+<AppLayout title="Conversor de Unidades — Stoic Tools" description="Converta valores entre diferentes unidades de medida: comprimento, peso, temperatura e mais.">
+  <UnitConverterTool client:load />
+</AppLayout>

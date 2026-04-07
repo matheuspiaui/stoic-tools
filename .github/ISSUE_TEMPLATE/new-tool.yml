@@ -1,0 +1,102 @@
+name: "Nova Ferramenta"
+description: "Solicitar a criação de uma nova ferramenta para o Stoic Tools"
+title: "feat: [NOME DA FERRAMENTA]"
+labels: ["enhancement", "new-tool"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use este template para descrever a ferramenta que deseja adicionar ao Stoic Tools.
+        Preencha o máximo possível — este formulário será usado como prompt para a IA criar a ferramenta.
+
+  - type: input
+    id: name
+    attributes:
+      label: Nome da ferramenta
+      description: "Nome curto e descritivo (ex: Gerador de UUID, Formatador de JSON)"
+      placeholder: "Conversor de Cores"
+    validations:
+      required: true
+
+  - type: input
+    id: slug
+    attributes:
+      label: Slug (URL)
+      description: "Identificador para a URL: /tools/{slug}"
+      placeholder: "color-converter"
+    validations:
+      required: true
+
+  - type: input
+    id: category
+    attributes:
+      label: Categoria
+      description: "Categoria no catálogo (ex: Utilidades, Texto, Desenvolvimento, Design)"
+      placeholder: "Design"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+      description: "O que a ferramenta faz? Qual problema resolve?"
+      placeholder: "Converte cores entre formatos HEX, RGB, HSL e mostra preview visual."
+    validations:
+      required: true
+
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Entradas (inputs)
+      description: "Quais campos o usuário preenche? Liste cada input."
+      placeholder: |
+        - Campo de texto para valor da cor (ex: #FF5733)
+        - Select para formato de entrada (HEX, RGB, HSL)
+    validations:
+      required: true
+
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Saídas (outputs)
+      description: "O que a ferramenta mostra como resultado?"
+      placeholder: |
+        - Valores convertidos em todos os formatos (HEX, RGB, HSL)
+        - Preview visual com a cor renderizada
+        - Botão de copiar cada valor
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Comportamento esperado
+      description: "Regras de negócio, validações, edge cases."
+      placeholder: |
+        - Converter em tempo real enquanto digita
+        - Aceitar HEX com ou sem #
+        - Mostrar erro para valores inválidos
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Referências
+      description: "Links, screenshots, ou ferramentas similares para inspiração."
+      placeholder: "Similar ao color picker do coolors.co"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Para a IA que vai implementar:** siga o playbook em `docs/ai/add-tool-playbook.md`.
+        Lembre-se:
+        - A ferramenta deve caber em uma única página
+        - Registrar em `src/lib/tools.ts`
+        - Adicionar em `__tests__/utils/fixtures.ts`
+        - Criar testes de negócio em `__tests__/tools/<slug>.spec.ts` (copiar do template)
+        - Rodar `npm run test:e2e` e `npm run test:visual:update` antes do PR

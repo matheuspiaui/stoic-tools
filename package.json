@@ -7,14 +7,31 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test:e2e": "playwright test --config __tests__/playwright.config.ts",
+    "test:e2e:ui": "playwright test --config __tests__/playwright.config.ts --ui",
+    "test:visual": "playwright test --config __tests__/playwright.config.ts base/visual-regression",
+    "test:visual:update": "playwright test --config __tests__/playwright.config.ts base/visual-regression --update-snapshots"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.3",
+    "@astrojs/sitemap": "^3.7.2",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro": "^6.1.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.7.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.59.1"
   }
 }

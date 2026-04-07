@@ -1,0 +1,8 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import { TextCaseConverterTool } from "../../components/tools/text-case-converter";
+---
+
+<AppLayout title="Conversor de Texto — Stoic Tools" description="Transforme texto entre diferentes formatos: maiúsculas, minúsculas, camelCase, snake_case e mais.">
+  <TextCaseConverterTool client:load />
+</AppLayout>
