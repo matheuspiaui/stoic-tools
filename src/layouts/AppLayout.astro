@@ -1,6 +1,7 @@
 ---
 import "../styles/globals.css";
 import { AppSidebar } from "../components/app-sidebar";
+import { ThemeSwitcher } from "../components/theme-switcher";
 
 interface Props {
   title?: string;
@@ -26,6 +27,9 @@ const currentPath = Astro.url.pathname;
     <div class="flex min-h-screen">
       <AppSidebar client:load currentPath={currentPath} />
       <div class="flex flex-1 flex-col md:ml-0">
+        <div class="flex justify-end px-4 py-2">
+          <ThemeSwitcher client:load />
+        </div>
         <slot />
       </div>
     </div>
