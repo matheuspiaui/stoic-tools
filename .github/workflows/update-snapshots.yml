@@ -1,0 +1,58 @@
+name: Update Visual Snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to update snapshots on"
+        required: true
+        default: "feat/stoic-tools-foundation"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    name: Regenerate snapshots
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Update all snapshots
+        run: npx playwright test --config __tests__/playwright.config.ts base/visual-regression --update-snapshots
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git add __tests__/snapshots/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No snapshot changes detected"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --cached --stat
+          fi
+
+      - name: Commit updated snapshots
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          git commit -m "test: update visual regression snapshots"
+          git push
