@@ -86,7 +86,7 @@ export function UnitConverterTool() {
     >
       <FieldGroup label="Categoria">
         <Select value={category} onValueChange={handleCategoryChange}>
-          <SelectTrigger>
+          <SelectTrigger aria-label="Categoria">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -102,7 +102,7 @@ export function UnitConverterTool() {
       <div className="grid grid-cols-[1fr,auto,1fr] items-end gap-3">
         <FieldGroup label="De">
           <Select value={fromUnit} onValueChange={setFromUnit}>
-            <SelectTrigger>
+            <SelectTrigger aria-label="Unidade de origem">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -121,7 +121,7 @@ export function UnitConverterTool() {
 
         <FieldGroup label="Para">
           <Select value={toUnit} onValueChange={setToUnit}>
-            <SelectTrigger>
+            <SelectTrigger aria-label="Unidade de destino">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://stoic-tools.vercel.app/sitemap-index.xml
