@@ -110,3 +110,46 @@ test.describe("Contador de Dias — business logic", () => {
     await expect(resultValue).toContainText("10 dias");
   });
 });
+
+test.describe("Contador de Dias — mobile layout", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(PATH);
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("date inputs do not overflow their container on mobile", async ({ page }) => {
+    const viewport = page.viewportSize();
+    if (!viewport) return;
+
+    const startInput = page.locator("#start-date");
+    const endInput = page.locator("#end-date");
+
+    const startBox = await startInput.boundingBox();
+    const endBox = await endInput.boundingBox();
+
+    if (startBox) {
+      expect(startBox.x).toBeGreaterThanOrEqual(0);
+      expect(startBox.x + startBox.width).toBeLessThanOrEqual(viewport.width);
+    }
+
+    if (endBox) {
+      expect(endBox.x).toBeGreaterThanOrEqual(0);
+      expect(endBox.x + endBox.width).toBeLessThanOrEqual(viewport.width);
+    }
+  });
+
+  test("quick add buttons wrap properly on small screens", async ({ page }) => {
+    await page.locator("#start-date").fill("2026-01-01");
+    await page.waitForTimeout(100);
+
+    const viewport = page.viewportSize();
+    if (!viewport) return;
+
+    const buttonsContainer = page.locator("#end-date ~ div, .mt-2.flex.flex-wrap");
+    const box = await buttonsContainer.first().boundingBox();
+
+    if (box) {
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+    }
+  });
+});
