@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ToolPage } from "@/components/tool-page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Pencil } from "lucide-react";
 
 const MIN_MINUTES = 5;
 const MAX_MINUTES = 60;
@@ -71,6 +72,9 @@ export function TomateTool() {
   const [remainingSeconds, setRemainingSeconds] = useState(DEFAULT_MINUTES * 60);
   const [showCustomBreak, setShowCustomBreak] = useState(false);
   const [customBreakMinutes, setCustomBreakMinutes] = useState("");
+  const [showEditMenu, setShowEditMenu] = useState(false);
+  const [editCustomBreak, setEditCustomBreak] = useState(false);
+  const [editCustomMinutes, setEditCustomMinutes] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -81,12 +85,71 @@ export function TomateTool() {
     }
   }, []);
 
+  const playGong = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+
+      // Strike tone
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(150, now);
+      osc1.frequency.exponentialRampToValueAtTime(80, now + 2);
+      gain1.gain.setValueAtTime(0.6, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+      osc1.connect(gain1).connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 2.5);
+
+      // High harmonic
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(450, now);
+      osc2.frequency.exponentialRampToValueAtTime(200, now + 1.5);
+      gain2.gain.setValueAtTime(0.3, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      osc2.connect(gain2).connect(ctx.destination);
+      osc2.start(now);
+      osc2.stop(now + 1.5);
+
+      // Impact noise
+      const bufferSize = ctx.sampleRate * 0.15;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      }
+      const noise = ctx.createBufferSource();
+      const noiseGain = ctx.createGain();
+      noise.buffer = buffer;
+      noiseGain.gain.setValueAtTime(0.4, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      noise.connect(noiseGain).connect(ctx.destination);
+      noise.start(now);
+    } catch {
+      // Fallback: play simple audio
+      audioRef.current?.play().catch(() => {});
+    }
+  }, []);
+
+  const sendNotification = useCallback(() => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Tomate Timer", {
+        body: "Tempo concluído!",
+        icon: "/favicon.svg",
+      });
+    }
+  }, []);
+
   const finishTimer = useCallback(() => {
     clearTimer();
     setRemainingSeconds(0);
     setStatus("finished");
-    audioRef.current?.play().catch(() => {});
-  }, [clearTimer]);
+    playGong();
+    sendNotification();
+  }, [clearTimer, playGong, sendNotification]);
 
   const startInterval = useCallback(() => {
     clearTimer();
@@ -143,7 +206,14 @@ export function TomateTool() {
     }
   }
 
+  function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }
+
   function handleStart() {
+    requestNotificationPermission();
     setStatus("running");
     startInterval();
   }
@@ -162,6 +232,9 @@ export function TomateTool() {
     clearTimer();
     setShowCustomBreak(false);
     setCustomBreakMinutes("");
+    setShowEditMenu(false);
+    setEditCustomBreak(false);
+    setEditCustomMinutes("");
     setMode("pomodoro");
     setStatus("idle");
     setTotalSeconds(DEFAULT_MINUTES * 60);
@@ -172,6 +245,9 @@ export function TomateTool() {
     clearTimer();
     setShowCustomBreak(false);
     setCustomBreakMinutes("");
+    setShowEditMenu(false);
+    setEditCustomBreak(false);
+    setEditCustomMinutes("");
     const breakSeconds = minutes * 60;
     setMode("break");
     setTotalSeconds(breakSeconds);
@@ -187,6 +263,16 @@ export function TomateTool() {
       handleStartBreak(mins);
     }
   }
+
+  function handleEditConfirmCustomBreak() {
+    const mins = parseInt(editCustomMinutes, 10);
+    if (mins > 0) {
+      handleStartBreak(mins);
+    }
+  }
+
+  const showEditButton =
+    status === "running" || status === "paused";
 
   const canDecrease = totalSeconds / 60 > MIN_MINUTES;
   const canIncrease = totalSeconds / 60 < MAX_MINUTES;
@@ -249,7 +335,76 @@ export function TomateTool() {
           )}
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-6 py-4">
+        <div className="relative flex flex-col items-center gap-6 py-4">
+          {/* Edit button — top right */}
+          {showEditButton && (
+            <button
+              data-testid="edit-button"
+              onClick={() => {
+                setShowEditMenu((prev) => !prev);
+                setEditCustomBreak(false);
+                setEditCustomMinutes("");
+              }}
+              className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-panel hover:text-foreground transition-colors"
+              aria-label="Editar timer"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Edit menu dropdown */}
+          {showEditMenu && (
+            <div
+              data-testid="edit-menu"
+              className="absolute right-0 top-10 z-10 flex flex-col gap-2 rounded-xl border border-muted/20 bg-panel p-3 shadow-lg"
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+              >
+                Reiniciar
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleStartBreak(3)}
+              >
+                Pausa 3 min
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleStartBreak(15)}
+              >
+                Pausa 15 min
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditCustomBreak(!editCustomBreak)}
+              >
+                Pausa personalizada
+              </Button>
+              {editCustomBreak && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    data-testid="edit-custom-break-input"
+                    type="number"
+                    min={1}
+                    placeholder="Min"
+                    value={editCustomMinutes}
+                    onChange={(e) => setEditCustomMinutes(e.target.value)}
+                    className="w-16 text-center"
+                  />
+                  <Button size="sm" onClick={handleEditConfirmCustomBreak}>
+                    Ok
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
           <span className="text-sm text-muted">{label}</span>
 
           <div className="relative">
