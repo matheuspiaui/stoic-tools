@@ -1,4 +1,4 @@
-import { Ruler, CaseSensitive } from "lucide-react";
+import { Ruler, CaseSensitive, Timer } from "lucide-react";
 import type { Tool } from "@/types/tool";
 
 export const tools: Tool[] = [
@@ -15,6 +15,13 @@ export const tools: Tool[] = [
     description: "Transforme texto entre diferentes formatos de capitalização.",
     icon: CaseSensitive,
     category: "Texto",
+  },
+  {
+    slug: "tomate",
+    name: "Tomate Timer",
+    description: "Controle o tempo de suas tarefas com foco usando a técnica Pomodoro.",
+    icon: Timer,
+    category: "Utilidades",
   },
 ];
 
