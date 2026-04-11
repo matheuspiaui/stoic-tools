@@ -319,6 +319,109 @@ test.describe("Tomate Timer — estado break", () => {
   });
 });
 
+test.describe("Tomate Timer — botao editar (menu rapido)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(PATH);
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("exibe botao de editar com icone de lapis durante execucao", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await expect(page.getByTestId("edit-button")).toBeVisible();
+  });
+
+  test("botao editar abre menu com opcoes de pausa", async ({ page }) => {
+    await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await page.getByTestId("edit-button").click();
+    const menu = page.getByTestId("edit-menu");
+    await expect(
+      menu.getByRole("button", { name: "Reiniciar", exact: true })
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("button", { name: "Pausa 3 min" })
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("button", { name: "Pausa 15 min" })
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("button", { name: "Pausa personalizada" })
+    ).toBeVisible();
+  });
+
+  test("botao editar fecha menu ao clicar novamente", async ({ page }) => {
+    await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await page.getByTestId("edit-button").click();
+    await expect(
+      page.getByRole("button", { name: "Pausa 3 min" })
+    ).toBeVisible();
+    await page.getByTestId("edit-button").click();
+    await expect(
+      page.getByRole("button", { name: "Pausa 3 min" })
+    ).not.toBeVisible();
+  });
+
+  test("Reiniciar no menu editar volta ao estado idle", async ({ page }) => {
+    await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await page.getByTestId("edit-button").click();
+    await page.getByTestId("edit-menu").getByRole("button", { name: "Reiniciar", exact: true }).click();
+    await expect(page.getByTestId("timer-display")).toHaveText("25:00");
+    await expect(
+      page.getByRole("button", { name: "Iniciar", exact: true })
+    ).toBeVisible();
+  });
+
+  test("Pausa 3 min no menu editar inicia break", async ({ page }) => {
+    await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await page.getByTestId("edit-button").click();
+    await page.getByRole("button", { name: "Pausa 3 min" }).click();
+    await expect(page.getByText("Pausa", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("timer-display")).toHaveText("03:00");
+  });
+
+  test("botao editar visivel durante pausa", async ({ page }) => {
+    await page.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await page.getByRole("button", { name: "Pausar", exact: true }).click();
+    await expect(page.getByTestId("edit-button")).toBeVisible();
+  });
+
+  test("botao editar nao visivel no estado idle", async ({ page }) => {
+    await expect(page.getByTestId("edit-button")).not.toBeVisible();
+  });
+});
+
+test.describe("Tomate Timer — push notification", () => {
+  test("tenta enviar push notification ao finalizar timer", async ({ page }) => {
+    await page.goto(PATH);
+    await page.waitForLoadState("networkidle");
+
+    // Mock Notification para capturar chamadas sem depender de permissão real
+    await page.evaluate(() => {
+      (window as any).__notificationArgs = null;
+      (window as any).Notification = class {
+        constructor(title: string, options?: NotificationOptions) {
+          (window as any).__notificationArgs = { title, body: options?.body };
+        }
+        static permission = "granted";
+        static requestPermission() {
+          return Promise.resolve("granted" as NotificationPermission);
+        }
+      };
+    });
+
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent("__test_force_finish"));
+    });
+
+    await expect(page.getByText("Tempo concluído")).toBeVisible({ timeout: 3000 });
+    const args = await page.evaluate(() => (window as any).__notificationArgs);
+    expect(args).not.toBeNull();
+    expect(args.title).toBe("Tomate Timer");
+    expect(args.body).toBe("Tempo concluído!");
+  });
+});
+
 test.describe("Tomate Timer — mobile layout", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(PATH);
