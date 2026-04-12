@@ -30,6 +30,12 @@ export const toolFixtures: ToolFixture[] = [
     description: "Transforme texto entre diferentes formatos de capitalização.",
     path: "/tools/text-case-converter",
   },
+  {
+    slug: "tomate",
+    name: "Tomate Timer",
+    description: "Controle o tempo de suas tarefas com foco usando a técnica Pomodoro.",
+    path: "/tools/tomate",
+  },
 ];
 
 /** All pages that should be tested (home + tools) */

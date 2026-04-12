@@ -52,6 +52,14 @@ src/
     └── tool.ts           # Contrato de tipo Tool
 ```
 
+## Ferramentas Disponíveis
+
+| Ferramenta | Slug | Categoria | Descrição |
+|-----------|------|-----------|-----------|
+| Conversor de Unidades | `unit-converter` | Utilidades | Converta valores entre diferentes unidades de medida |
+| Conversor de Texto | `text-case-converter` | Texto | Transforme texto entre diferentes formatos de capitalização |
+| Tomate Timer | `tomate` | Utilidades | Timer Pomodoro com progress bar circular, pausas configuráveis e alerta sonoro |
+
 ## Regra Principal
 
 **Cada ferramenta cabe em uma página.** Sem sub-rotas, sem micro-sites, sem estruturas paralelas.
