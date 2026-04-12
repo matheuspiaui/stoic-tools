@@ -1,4 +1,4 @@
-import { Ruler, CaseSensitive, CalendarDays } from "lucide-react";
+import { Ruler, CaseSensitive, CalendarDays, Timer } from "lucide-react";
 import type { Tool } from "@/types/tool";
 
 export const tools: Tool[] = [
@@ -21,6 +21,13 @@ export const tools: Tool[] = [
     name: "Contador de Dias",
     description: "Calcule a quantidade de dias entre duas datas.",
     icon: CalendarDays,
+    category: "Utilidades",
+  },
+  {
+    slug: "tomate",
+    name: "Tomate Timer",
+    description: "Controle o tempo de suas tarefas com foco usando a técnica Pomodoro.",
+    icon: Timer,
     category: "Utilidades",
   },
 ];

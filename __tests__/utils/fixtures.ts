@@ -36,6 +36,12 @@ export const toolFixtures: ToolFixture[] = [
     description: "Calcule a quantidade de dias entre duas datas.",
     path: "/tools/count-days",
   },
+  {
+    slug: "tomate",
+    name: "Tomate Timer",
+    description: "Controle o tempo de suas tarefas com foco usando a técnica Pomodoro.",
+    path: "/tools/tomate",
+  },
 ];
 
 /** All pages that should be tested (home + tools) */
