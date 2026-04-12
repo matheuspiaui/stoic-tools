@@ -1,0 +1,8 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import { CountDaysTool } from "../../components/tools/count-days";
+---
+
+<AppLayout title="Contador de Dias — Stoic Tools" description="Calcule a quantidade de dias entre duas datas.">
+  <CountDaysTool client:load />
+</AppLayout>
